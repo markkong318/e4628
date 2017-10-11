@@ -1,5 +1,4 @@
-const ipcMain = require('electron').remote.ipcMain;
-const store = require('store');
+const store = require('store')
 
 WebApi = function (webview) {
 
@@ -19,8 +18,6 @@ WebApi = function (webview) {
   this.deferredMap = new Map();
 
   this.webview.addEventListener('dom-ready', () => {
-    console.log('dom-ready')
-
     if (this.domReadyPromiseDeferred) {
       this.domReadyPromiseDeferred.resolve();
     }
@@ -69,7 +66,7 @@ WebApi = function (webview) {
   }
 
   this.isLogin = () => {
-    if (this.getModule() != 'top') {
+    if (this.getModule() !== 'top') {
       return false;
     }
     return true

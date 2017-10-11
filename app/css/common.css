@@ -1,4 +1,13 @@
 @charset "UTF-8";
+
+/* Fonts */
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400);
+
+/* fontawesome */
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+[class*="fontawesome-"]:before {
+	font-family: 'FontAwesome', sans-serif;
+}
 /* CSS Document */
 /* ========================= [ base ] */
 body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, button, textarea, p, blockquote, th, td {
@@ -13,8 +22,7 @@ img {
 }
 body {
 	text-align: center;
-	font-family: "ヒラギノ角ゴ Pro W3", Hiragino Kaku Gothic Pro, " メイリオ", Meiryo, Osaka, " ＭＳ Ｐゴシック", MS PGothic, " sans-serif";
-	-webkit-app-region: drag
+	-webkit-app-region: drag;
 }
 a {
 	text-decoration: none;
@@ -84,6 +92,7 @@ a:hover {
 /* ========================= [ .main ] */
 .main {
 	min-width: 320px;
+	height: 95vh;
 	text-align: center;
 	overflow: hidden;
 	background: #fafafa;
@@ -126,15 +135,6 @@ footer {
 	position: fixed;
 	bottom: 0px;
 	width: 100%;
-}
-
-/* Fonts */
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400);
-
-/* fontawesome */
-@import url(http://weloveiconfonts.com/api/?family=fontawesome);
-[class*="fontawesome-"]:before {
-	font-family: 'FontAwesome', sans-serif;
 }
 
 /* Simple Reset */

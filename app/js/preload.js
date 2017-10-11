@@ -1,20 +1,4 @@
-var ipcRenderer = require('electron').ipcRenderer;
-//
-//
-// ipcRenderer.on('ping', function() {
-//     ipcRenderer.sendToHost('pong');
-//     ipcRenderer.sendToHost('pong2');
-// });
-//
-//
-// ipcRenderer.on('asynchronous-reply', function(event, arg) {
-//     console.log(arg); // prints "pong"
-// });
-// ipcRenderer.send('asynchronous-message', 'ping-asy');
-//
-//
-// ipcRenderer.send('query', '5566 no 1');
-
+const ipcRenderer = require('electron').ipcRenderer;
 
 function jqueryPromiseDeferred() {
   this.promise = new Promise((resolve, reject) => {
