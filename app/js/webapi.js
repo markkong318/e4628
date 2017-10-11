@@ -87,10 +87,8 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      // this.executeJavaScript(`$('#sub_header_border_top > form > table > tbody > tr > td:nth-child(2) > button').click()`);
+      this.executeJavaScript(`web_api_broker.arrive()`);
 
-      // mock action
-      deferred.resolve();
     });
 
     return deferred.promise
@@ -101,10 +99,8 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      // this.executeJavaScript(`$('#sub_header_border_top > form > table > tbody > tr > td:nth-child(3) > button').click()`);
+      this.executeJavaScript(`web_api_broker.dismiss()`);
 
-      // mock action
-      deferred.resolve();
     });
 
     return deferred.promise;

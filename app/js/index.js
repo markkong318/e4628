@@ -1,6 +1,7 @@
 const ipcMain = require('electron').remote.ipcMain
 const ipcRenderer = require('electron').ipcRenderer
 const store = require('store')
+const moment = require('moment');
 require('./webapi')
 
 const webview = document.querySelector('webview')
@@ -52,7 +53,7 @@ const loginHandler = (opt) => {
 
 const initialDomReadyHandler = () => {
   webview.removeEventListener('dom-ready', initialDomReadyHandler)
-
+  webview.openDevTools()
   loginHandler();
 }
 
@@ -73,7 +74,7 @@ ipcMain.on(`webview-getOwner`, (event, value, deferred_id) => {
   web_api.resolveDeferred(deferred_id, value)
 })
 
-ipcRenderer.on(`main-clickDismiss`, (event, value) => {
+ipcRenderer.on(`webview-clickDismiss`, (event, value) => {
   console.log('click dismiss')
   web_api.loadLoginURL()
     .then(() => web_api.login())
@@ -91,7 +92,7 @@ ipcRenderer.on(`main-clickDismiss`, (event, value) => {
     })
 });
 
-ipcRenderer.on(`main-clickArrive`, (event, value) => {
+ipcRenderer.on(`webview-clickArrive`, (event, value) => {
   console.log('click arrive')
   web_api.loadLoginURL()
     .then(() => web_api.login())
@@ -110,10 +111,18 @@ ipcRenderer.on(`main-clickArrive`, (event, value) => {
     })
 });
 
-ipcRenderer.on(`main-saveAuth`, (event) => {
+ipcRenderer.on(`webview-saveAuth`, (event) => {
   loginHandler()
 })
 
-ipcRenderer.on(`main-resume`, (event) => {
-  loginHandler({silent: true})
+ipcRenderer.on(`webview-resume`, (event) => {
+
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), 5000)
+  })
+
+  promise.then(() => {
+    loginHandler({silent: true})
+  })
+  
 })

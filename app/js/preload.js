@@ -21,6 +21,25 @@ window.onload = () => {
 };
 
 WebApiBroker = function () {
+
+  this.arrive = () => {
+    jqueryDeferred.promise.then(() => {
+      let time = ''
+
+      const time_txt =
+        $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(1) > button').click()
+    })
+  }
+
+  this.dismiss = () => {
+    jqueryDeferred.promise.then(() => {
+      let time = ''
+
+      const time_txt =
+        $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(3) > button').click()
+    })
+  }
+
   this.getArrivalTime = (deferred_id) => {
 
     jqueryDeferred.promise.then(() => {
@@ -44,7 +63,7 @@ WebApiBroker = function () {
       let time = ''
 
       const time_txt =
-        $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(3) > #timerecorder_txt').text()
+        $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(4) > #timerecorder_txt').text()
       const match = time_txt.match(/\d+:\d+/);
 
       if (match && match.length == 1) {

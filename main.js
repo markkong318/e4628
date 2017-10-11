@@ -45,7 +45,7 @@ function createLoginWindow() {
 
 ipcMain.on('main-saveAuth', (ev) => {
   loginWindow.hide()
-  mainWindow.webContents.send('main-saveAuth')
+  mainWindow.webContents.send('webview-saveAuth')
 })
 
 app.on('ready', () => {
@@ -53,7 +53,7 @@ app.on('ready', () => {
   createLoginWindow()
 
   electron.powerMonitor.on('resume', () => {
-    mainWindow.webContents.send('main-resume')
+    mainWindow.webContents.send('webview-resume')
   })
 })
 
@@ -124,7 +124,7 @@ ipcMain.on('main-getArrivalTime', (ev, dt) => {
     template.label = `Click to Arrive`
     template.enabled = true
     template.click = () => {
-      mainWindow.webContents.send('main-clickArrive')
+      mainWindow.webContents.send('webview-clickArrive')
     }
   }
 
@@ -143,7 +143,7 @@ ipcMain.on('main-getDismissTime', (ev, dt) => {
     template.label = `Click to Dismiss`
     template.enabled = true
     template.click = () => {
-      mainWindow.webContents.send('main-clickDismiss')
+      mainWindow.webContents.send('webview-clickDismiss')
     }
   }
 
