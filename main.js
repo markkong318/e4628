@@ -14,6 +14,7 @@ const ipcMain = require('electron').ipcMain;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let loginWindow
 
 function createWindow() {
   // Create the browser window.
@@ -34,7 +35,7 @@ function createWindow() {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    mainWindow = null
+    // mainWindow = null
   })
 
   // Hide on production mode
@@ -66,19 +67,32 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
+const showWebviewHandler = () => {
+  const template = appIconTemplate[7];
+
+  if (mainWindow.isVisible()) {
+    mainWindow.hide()
+    template.label = 'Show Debug Webview'
+  } else {
+    mainWindow.show()
+    template.label = 'Hide Debug Webview'
+  }
+
+  const contextMenu = Menu.buildFromTemplate(appIconTemplate);
+  appIcon.setContextMenu(contextMenu)
+}
+
 const appIconTemplate = [
-  {label: '<<User Name>>', enabled: false},
+  {label: 'Initialize user name...', enabled: false},
   {type: 'separator'},
-  {label: '<<Arrival>>'},
-  {label: '<<Dismiss>>'},
+  {label: 'Initialize arrive...', enabled: false},
+  {label: 'Initialize dismiss...', enabled: false},
   {type: 'separator'},
-  {label: '<<Show Webview>>'},
+  {label: 'Login'},
   {type: 'separator'},
-  {
-    label: 'Exit', accelerator: 'Command+Q', click: function () {
-    app.quit();
-  }
-  }
+  {label: 'Hide Debug Webview', click: showWebviewHandler},
+  {type: 'separator'},
+  {label: 'Exit', accelerator: 'Command+Q', click: () => { app.quit() }}
 ];
 
 let appIcon = null;
@@ -101,7 +115,6 @@ ipcMain.on('main-getArrivalTime', (ev, dt) => {
     template.label = `Click to Arrive`
     template.enabled = true
     template.click = () => {
-      console.log('click')
       mainWindow.webContents.send('main-clickArrive')
     }
   }
@@ -147,3 +160,20 @@ app.on('window-all-closed', function () {
   if (appIcon) appIcon.destroy()
 })
 
+function createLoginWindow() {
+
+  loginWindow = new BrowserWindow({frame: false, width: 375, height: 667})
+
+  loginWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'app/login.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
+}
+
+ipcMain.on('main-saveAuth', (ev) => {
+  loginWindow.hide()
+  mainWindow.webContents.send('main-saveAuth')
+})
+
+app.on('ready', createLoginWindow)

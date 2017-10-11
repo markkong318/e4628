@@ -1,19 +1,19 @@
 var ipcRenderer = require('electron').ipcRenderer;
-
-
-ipcRenderer.on('ping', function() {
-    ipcRenderer.sendToHost('pong');
-    ipcRenderer.sendToHost('pong2');
-});
-
-
-ipcRenderer.on('asynchronous-reply', function(event, arg) {
-    console.log(arg); // prints "pong"
-});
-ipcRenderer.send('asynchronous-message', 'ping-asy');
-
-
-ipcRenderer.send('query', '5566 no 1');
+//
+//
+// ipcRenderer.on('ping', function() {
+//     ipcRenderer.sendToHost('pong');
+//     ipcRenderer.sendToHost('pong2');
+// });
+//
+//
+// ipcRenderer.on('asynchronous-reply', function(event, arg) {
+//     console.log(arg); // prints "pong"
+// });
+// ipcRenderer.send('asynchronous-message', 'ping-asy');
+//
+//
+// ipcRenderer.send('query', '5566 no 1');
 
 
 function jqueryPromiseDeferred() {
@@ -38,7 +38,7 @@ window.onload = () => {
 };
 
 WebApiBroker = function() {
-    this.getArrivalTime = () => {
+    this.getArrivalTime = (deferred_id) => {
 
         jqueryDeferred.promise.then(() => {
             let time = ''
@@ -51,11 +51,11 @@ WebApiBroker = function() {
                 time = match[0];
             }
 
-            ipcRenderer.send(`webview-getArrivalTime`, time)
+            ipcRenderer.send(`webview-getArrivalTime`, time, deferred_id)
         })
     }
 
-    this.getDismissTime = () => {
+    this.getDismissTime = (deferred_id) => {
 
         jqueryDeferred.promise.then(() => {
             let time = ''
@@ -67,17 +67,19 @@ WebApiBroker = function() {
             if (match && match.length == 1) {
                 time = match[0]
             }
-            console.log('dismiss:' + time)
-            ipcRenderer.send(`webview-getDismissTime`, time)
+
+            ipcRenderer.send(`webview-getDismissTime`, time, deferred_id)
         })
     }
 
-    this.getOwner = () => {
+    this.getOwner = (deferred_id) => {
 
         jqueryDeferred.promise.then(() => {
             const user_name = $('.user_name').text()
 
-            ipcRenderer.send(`webview-getOwner`, user_name)
+            console.log('deffff:' + deferred_id)
+
+            ipcRenderer.send(`webview-getOwner`, user_name, deferred_id)
         })
     }
 }

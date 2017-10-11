@@ -1,5 +1,6 @@
 const ipcMain = require('electron').remote.ipcMain;
 const ipcRenderer = require('electron').ipcRenderer;
+const store = require('store');
 require('./webapi');
 
 const webview = document.querySelector('webview')
@@ -7,51 +8,84 @@ const web_api = new WebApi(webview)
 
 const initialDomReadyHandler = () => {
   webview.removeEventListener('dom-ready', initialDomReadyHandler)
-
+  webview.openDevTools()
   web_api.loadLoginURL()
     .then(() => web_api.login())
     .then(() => {
       web_api.getArrivalTime()
       web_api.getDismissTime()
       web_api.getOwner()
+        .then((name) => {
+          const notification = {
+            title: 'RGames',
+            body: `Hi! Welcome back \n${name}`
+          }
 
-      const notification = {
-        title: 'RGames',
-        body: 'Login successful'
-      }
-      const myNotification = new window.Notification(notification.title, notification)
+          new window.Notification(notification.title, notification)
+        })
     })
 }
 
 webview.addEventListener('dom-ready', initialDomReadyHandler);
 
-ipcMain.on(`webview-getArrivalTime`, (event, value) => {
-  ipcRenderer.send('main-getArrivalTime', value);
+ipcMain.on(`webview-getArrivalTime`, (event, value, deferred_id) => {
+  ipcRenderer.send('main-getArrivalTime', value)
+
+  web_api.resolveDeferred(deferred_id, value)
 })
 
-ipcMain.on(`webview-getDismissTime`, (event, value) => {
-  ipcRenderer.send('main-getDismissTime', value);
+ipcMain.on(`webview-getDismissTime`, (event, value, deferred_id) => {
+  ipcRenderer.send('main-getDismissTime', value)
+
+  web_api.resolveDeferred(deferred_id, value)
 })
 
-ipcMain.on(`webview-getOwner`, (event, value) => {
-  ipcRenderer.send('main-getOwner', value);
+ipcMain.on(`webview-getOwner`, (event, value, deferred_id) => {
+  ipcRenderer.send('main-getOwner', value)
+  console.log('deferr id:' + deferred_id )
+  web_api.resolveDeferred(deferred_id, value)
 })
 
-ipcRenderer.on(`main-clickDismiss`, (event, vale) => {
+ipcRenderer.on(`main-clickDismiss`, (event, value) => {
   console.log('click dismiss')
+  web_api.loadLoginURL()
+    .then(() => web_api.login())
+    .then(() => web_api.dismiss())
+    .then(() => {
+      web_api.getDismissTime()
+        .then((time) => {
+          const notification = {
+            title: 'RGames',
+            body: `You dismissed at ${time}`
+          }
+
+          new window.Notification(notification.title, notification)
+        })
+    })
+});
+
+ipcRenderer.on(`main-clickArrive`, (event, value) => {
+  console.log('click arrive')
   web_api.loadLoginURL()
     .then(() => web_api.login())
     .then(() => web_api.arrival())
     .then(() => {
-      web_api.getDismissTime()
+      console.log('arrival')
+      web_api.getArrivalTime()
+        .then((time) => {
+          const notification = {
+            title: 'RGames',
+            body: `You dismissed at ${time}`
+          }
 
-      // TODO: send notification on dismiss at 00:00
+          new window.Notification(notification.title, notification)
+        })
     })
 });
 
-ipcRenderer.on(`main-clickArrive`, (event, vale) => {
-  console.log('click arrive')
-});
+ipcRenderer.on(`main-saveAuth`, (event) => {
+
+})
 
 // webview.addEventListener('dom-ready', () => {
 //     webview.openDevTools();

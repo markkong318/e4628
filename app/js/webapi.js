@@ -15,6 +15,8 @@ WebApi = function (webview) {
   this.domReadyPromiseDeferred = new LoadingPromiseDeferred()
   this.domReadyPromiseDeferred.resolve()
 
+  this.deferredMap = new Map();
+
   this.webview.addEventListener('dom-ready', () => {
     console.log('dom-ready')
 
@@ -87,11 +89,6 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      if (this.getModule() != 'top') {
-        deferred.reject()
-        return deferred.promis
-      }
-
       // this.executeJavaScript(`$('#sub_header_border_top > form > table > tbody > tr > td:nth-child(2) > button').click()`);
 
       // mock action
@@ -106,11 +103,6 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      if (this.getModule() != 'top') {
-        deferred.reject()
-        return deferred.promise
-      }
-
       // this.executeJavaScript(`$('#sub_header_border_top > form > table > tbody > tr > td:nth-child(3) > button').click()`);
 
       // mock action
@@ -121,31 +113,62 @@ WebApi = function (webview) {
   }
 
   this.getArrivalTime = () => {
-    if (this.getModule() != 'top') {
-      return;
-    }
+    const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getArrivalTime()`);
+    this.executeJavaScript(`web_api_broker.getArrivalTime('${deferred.id}')`);
+
+    return deferred.promise;
   }
 
   this.getDismissTime = () => {
-    if (this.getModule() != 'top') {
-      return getPromise;
-    }
+    const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getDismissTime()`);
-  }
+    this.executeJavaScript(`web_api_broker.getDismissTime('${deferred.id}')`);
 
-  this.notifyDismissTime = (time) => {
-
+    return deferred.promise;
   }
 
   this.getOwner = () => {
-    if (this.getModule() != 'top') {
-      return;
+    const deferred = this.addDeferred()
+
+    this.executeJavaScript(`web_api_broker.getOwner('${deferred.id}')`);
+
+    return deferred.promise;
+  }
+
+  function Deferred() {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let id = '';
+    for (let i = 0; i < 6; i++) {
+      id += possible.charAt(Math.floor(Math.random() * possible.length));
     }
 
-    this.executeJavaScript(`web_api_broker.getOwner()`);
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+      this.id = id
+    });
+  }
+
+  this.addDeferred = () => {
+    const deferred = new Deferred()
+
+    this.deferredMap.set(deferred.id, deferred)
+
+    return deferred
+  }
+
+  this.resolveDeferred = (id, value) => {
+
+    if (!this.deferredMap.has((id))) {
+      return
+    }
+
+    const deferred = this.deferredMap.get(id)
+
+    deferred.resolve(value);
+
+    this.deferredMap.delete(id)
   }
 
   function LoadingPromiseDeferred() {
