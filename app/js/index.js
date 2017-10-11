@@ -6,16 +6,25 @@ require('./webapi');
 const webview = document.querySelector('webview')
 const web_api = new WebApi(webview)
 
-const initialDomReadyHandler = () => {
-  webview.removeEventListener('dom-ready', initialDomReadyHandler)
-  webview.openDevTools()
+const loginHandler = (opt) => {
   web_api.loadLoginURL()
+    .then(() => web_api.syncStore())
     .then(() => web_api.login())
+    .then(() => {
+      if (!web_api.isLogin()) {
+        return Promise.reject('Login failed\nPlease check the login data')
+      }
+    })
     .then(() => {
       web_api.getArrivalTime()
       web_api.getDismissTime()
       web_api.getOwner()
         .then((name) => {
+
+          if (opt &&'silent' in opt && opt.silent) {
+            return
+          }
+
           const notification = {
             title: 'RGames',
             body: `Hi! Welcome back \n${name}`
@@ -24,6 +33,25 @@ const initialDomReadyHandler = () => {
           new window.Notification(notification.title, notification)
         })
     })
+    .catch((msg) => {
+      if (opt &&'silent' in opt && opt.silent) {
+        return
+      }
+
+      if (msg) {
+        const notification = {
+          title: 'RGames',
+          body: msg
+        }
+        new window.Notification(notification.title, notification)
+      }
+    })
+}
+
+const initialDomReadyHandler = () => {
+  webview.removeEventListener('dom-ready', initialDomReadyHandler)
+
+  loginHandler();
 }
 
 webview.addEventListener('dom-ready', initialDomReadyHandler);
@@ -84,7 +112,11 @@ ipcRenderer.on(`main-clickArrive`, (event, value) => {
 });
 
 ipcRenderer.on(`main-saveAuth`, (event) => {
+  loginHandler()
+})
 
+ipcRenderer.on(`main-resume`, (event) => {
+  loginHandler({silent: true})
 })
 
 // webview.addEventListener('dom-ready', () => {

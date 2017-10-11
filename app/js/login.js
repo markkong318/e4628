@@ -6,8 +6,6 @@ const employeeIdField = document.querySelector('#employee_id')
 const passwordField = document.querySelector('#password')
 
 const clickSignInHandler = () => {
-  console.log('click')
-
   const employeeId = employeeIdField.value
   const password = passwordField.value
 
@@ -16,7 +14,14 @@ const clickSignInHandler = () => {
     password
   })
 
-  ipcRenderer.send('main-saveAuth', value)
+  ipcRenderer.send('main-saveAuth')
 }
 
 signInBtn.addEventListener('click', clickSignInHandler)
+
+const auth = store.get('auth')
+
+if (auth) {
+  employeeIdField.value = auth.employeeId ? auth.employeeId: ''
+  passwordField.value = auth.password ? auth.password: ''
+}

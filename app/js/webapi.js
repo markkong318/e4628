@@ -1,4 +1,5 @@
 const ipcMain = require('electron').remote.ipcMain;
+const store = require('store');
 
 WebApi = function (webview) {
 
@@ -134,6 +135,25 @@ WebApi = function (webview) {
     this.executeJavaScript(`web_api_broker.getOwner('${deferred.id}')`);
 
     return deferred.promise;
+  }
+
+  this.syncStore = () => {
+    const auth = store.get('auth')
+
+    if (!auth) {
+      return Promise.reject()
+    }
+
+    if (!'employeeId' in auth || !'password' in auth) {
+      return Promise.reject()
+    }
+
+    if (!auth.employeeId || !auth.password) {
+      return Promise.reject()
+    }
+
+    this.login_id = auth.employeeId
+    this.password = auth.password
   }
 
   function Deferred() {
