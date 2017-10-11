@@ -12,6 +12,8 @@ const loginHandler = (opt) => {
     .then(() => web_api.login())
     .then(() => {
       if (!web_api.isLogin()) {
+        ipcRenderer.send('main-showLogin')
+
         return Promise.reject('Login failed\nPlease check the login data')
       }
     })

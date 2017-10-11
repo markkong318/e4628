@@ -53,7 +53,6 @@ app.on('ready', () => {
   createLoginWindow()
 
   electron.powerMonitor.on('resume', () => {
-    console.log('resume at' + (new Date()))
     mainWindow.webContents.send('main-resume')
   })
 })
@@ -107,7 +106,7 @@ const appIconTemplate = [
 
 let appIcon = null;
 app.on('ready', () => {
-  appIcon = new Tray('app/img/tray-icon-rakuten@2x.png');
+  appIcon = new Tray(__dirname + '/app/img/tray-icon-rakuten@2x.png');
   const contextMenu = Menu.buildFromTemplate(appIconTemplate);
 
   appIcon.setToolTip('Rakuten Games');
@@ -144,7 +143,6 @@ ipcMain.on('main-getDismissTime', (ev, dt) => {
     template.label = `Click to Dismiss`
     template.enabled = true
     template.click = () => {
-      console.log('click')
       mainWindow.webContents.send('main-clickDismiss')
     }
   }
@@ -155,7 +153,6 @@ ipcMain.on('main-getDismissTime', (ev, dt) => {
 
 ipcMain.on('main-getOwner', (ev, owner) => {
   const template = appIconTemplate[0];
-  console.log(owner);
   if (owner) {
     template.label = `${owner}`
   } else {
@@ -164,4 +161,8 @@ ipcMain.on('main-getOwner', (ev, owner) => {
 
   const contextMenu = Menu.buildFromTemplate(appIconTemplate);
   appIcon.setContextMenu(contextMenu)
+})
+
+ipcMain.on('main-showLogin', (ev) => {
+  loginWindow.show()
 })
