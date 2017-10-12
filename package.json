@@ -21,6 +21,8 @@
     "electron": "~1.7.8"
   },
   "dependencies": {
+    "async-lock": "^1.0.0",
+    "electron-notifications": "^1.0.0",
     "jquery": "^3.2.1",
     "moment": "^2.19.0",
     "store": "^2.0.12"

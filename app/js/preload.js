@@ -40,7 +40,7 @@ WebApiBroker = function () {
     })
   }
 
-  this.getArrivalTime = (deferred_id) => {
+  this.getArriveTime = (deferred_id) => {
 
     jqueryDeferred.promise.then(() => {
       let time = ''
@@ -53,7 +53,7 @@ WebApiBroker = function () {
         time = match[0];
       }
 
-      ipcRenderer.send(`webview-getArrivalTime`, time, deferred_id)
+      ipcRenderer.send(`webview-getArriveTime`, time, deferred_id)
     })
   }
 

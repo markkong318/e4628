@@ -113,11 +113,11 @@ app.on('ready', () => {
   appIcon.setContextMenu(contextMenu)
 })
 
-ipcMain.on('main-getArrivalTime', (ev, dt) => {
+ipcMain.on('main-getArriveTime', (ev, dt) => {
   const template = appIconTemplate[2];
 
   if (dt) {
-    template.label = `Arrival on ${dt}`
+    template.label = `Arrive on ${dt}`
     template.enabled = false
     template.click = null
   } else {

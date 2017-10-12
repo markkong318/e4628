@@ -82,7 +82,7 @@ WebApi = function (webview) {
     return match[1]
   }
 
-  this.arrival = () => {
+  this.arrive = () => {
     const deferred = new LoadingPromiseDeferred();
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
@@ -106,10 +106,10 @@ WebApi = function (webview) {
     return deferred.promise;
   }
 
-  this.getArrivalTime = () => {
+  this.getArriveTime = () => {
     const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getArrivalTime('${deferred.id}')`);
+    this.executeJavaScript(`web_api_broker.getArriveTime('${deferred.id}')`);
 
     return deferred.promise;
   }
@@ -191,5 +191,4 @@ WebApi = function (webview) {
     });
   }
 }
-
 
