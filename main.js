@@ -27,7 +27,7 @@ function createWindow() {
     app.quit()
   })
 
-  // mainWindow.hide()
+  mainWindow.hide()
 }
 
 function createLoginWindow() {
@@ -39,6 +39,8 @@ function createLoginWindow() {
     protocol: 'file:',
     slashes: true
   }))
+
+  loginWindow.setResizable(false)
 
   loginWindow.hide()
 }
@@ -75,6 +77,7 @@ app.on('window-all-closed', function () {
   if (appIcon) appIcon.destroy()
 })
 
+app.dock.hide();
 
 const showWebviewHandler = () => {
   const template = appIconTemplate[7];
@@ -99,7 +102,7 @@ const appIconTemplate = [
   {type: 'separator'},
   {label: 'Login', click: () => { loginWindow.show() }},
   {type: 'separator'},
-  {label: 'Hide Debug Webview', click: showWebviewHandler},
+  {label: 'Show Debug Webview', click: showWebviewHandler},
   {type: 'separator'},
   {label: 'Exit', accelerator: 'Command+Q', click: () => { app.quit() }}
 ];
