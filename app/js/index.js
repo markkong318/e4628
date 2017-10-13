@@ -12,8 +12,14 @@ const web_api = new WebApi(webview)
 const lock = new AsyncLock()
 const LOCK_KEY = 'WEBVIEW_LOCK'
 
+const INFINITY_LOOP_TIMER = 600000
+const RESUME_DELAY_TIMER = 10000
+
 const loginHandler = (opt) => {
+
   lock.acquire(LOCK_KEY, (done) => {
+    store.set('last_login', moment().format('YYYY-MM-DD'))
+
     web_api.loadLoginURL()
       .then(() => web_api.syncStore())
       .then(() => web_api.login())
@@ -105,75 +111,77 @@ const dismissHandler = () => {
 }
 
 const queryStateHandler = () => {
-  const today = moment();
+  lock.acquire(LOCK_KEY, (done) => {
+    const today = moment();
 
-  const checkArriveStart = moment('07:00', "hh:mm")
-  const checkArriveEnd = moment('10:00', "hh:mm")
+    const checkArriveStart = moment('07:00', "hh:mm")
+    const checkArriveEnd = moment('10:00', "hh:mm")
 
-  if (today.isAfter(checkArriveStart) && today.isBefore(checkArriveEnd)) {
-    const arrive_time = store.get('arrive_time')
+    if (today.isAfter(checkArriveStart) && today.isBefore(checkArriveEnd)) {
+      const arrive_time = store.get('arrive_time')
 
-    if (!arrive_time) {
-      const nc = new notifier.NotificationCenter();
-      const trueAnswer = 'Let\' GO';
+      if (!arrive_time) {
+        const nc = new notifier.NotificationCenter()
+        const trueAnswer = 'Let\' GO'
 
-      nc.notify({
-          title: 'Forget to check in?',
-          message: 'Do you want to check in?',
-          closeLabel: 'No',
-          actions: trueAnswer
-        }, function (err, response, metadata) {
-          if (err) throw err;
+        nc.notify({
+            title: 'Forget to check in?',
+            message: 'Do you want to check in?',
+            closeLabel: 'No',
+            actions: trueAnswer
+          }, function (err, response, metadata) {
+            if (err) throw err;
 
-          if (metadata.activationValue !== trueAnswer) {
-            return
+            if (metadata.activationValue !== trueAnswer) {
+              return
+            }
+
+            arriveHandler()
           }
-
-          arriveHandler()
-        }
-      );
-
+        )
+      }
     }
-  }
 
-  const checkDismissStart = moment('17:35', "hh:mm")
-  const checkDismissEnd = moment('20:00', "hh:mm")
+    const checkDismissStart = moment('17:35', "hh:mm")
+    const checkDismissEnd = moment('20:00', "hh:mm")
 
-  if (today.isAfter(checkDismissStart) && today.isBefore(checkDismissEnd)) {
-    const arrive_time = store.get('dismiss_time')
+    if (today.isAfter(checkDismissStart) && today.isBefore(checkDismissEnd)) {
+      const arrive_time = store.get('dismiss_time')
 
-    if (!arrive_time) {
-      const nc = new notifier.NotificationCenter();
-      const trueAnswer = 'Let\' GO';
+      if (!arrive_time) {
+        const nc = new notifier.NotificationCenter()
+        const trueAnswer = 'Let\' GO'
 
-      nc.notify({
-          title: 'Forget to check out?',
-          message: 'Do you want to check out?',
-          closeLabel: 'No',
-          actions: trueAnswer
-        }, function (err, response, metadata) {
-          if (err) throw err;
+        nc.notify({
+            title: 'Forget to check out?',
+            message: 'Do you want to check out?',
+            closeLabel: 'No',
+            actions: trueAnswer
+          }, function (err, response, metadata) {
+            if (err) throw err
 
-          if (metadata.activationValue !== trueAnswer) {
-            return
+            if (metadata.activationValue !== trueAnswer) {
+              return
+            }
+
+            dismissHandler()
           }
-
-          dismissHandler()
-        }
-      );
-
+        )
+      }
     }
-  }
+  })
 }
 
 const infinityLoopHandler = () => {
+  if (store.get('last_login') !== moment().format('YYYY-MM-DD')) {
+    loginHandler()
+  }
   queryStateHandler()
 }
 
 let infinityLoopTimer = setInterval(() => {
   infinityLoopHandler()
-}, 600000);
-console.log(`infi: ${infinityLoopTimer}`)
+}, INFINITY_LOOP_TIMER);
 
 const initialDomReadyHandler = () => {
   webview.removeEventListener('dom-ready', initialDomReadyHandler)
@@ -217,7 +225,7 @@ ipcRenderer.on(`webview-saveAuth`, (event) => {
 ipcRenderer.on(`webview-resume`, (event) => {
 
   const promise = new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), 5000)
+    setTimeout(() => resolve(), RESUME_DELAY_TIMER)
   })
 
   promise.then(() => {
@@ -226,12 +234,11 @@ ipcRenderer.on(`webview-resume`, (event) => {
     queryStateHandler()
 
     clearInterval(infinityLoopTimer)
-    
+
     infinityLoopTimer = setInterval(() => {
       infinityLoopHandler()
-    }, 600000);
+    }, INFINITY_LOOP_TIMER);
 
-    console.log(`infi: ${infinityLoopTimer}`)
   })
 
 })

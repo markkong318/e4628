@@ -169,3 +169,7 @@ ipcMain.on('main-getOwner', (ev, owner) => {
 ipcMain.on('main-showLogin', (ev) => {
   loginWindow.show()
 })
+
+ipcMain.on('main-debug', (msg) => {
+  console.log(msg)
+})
