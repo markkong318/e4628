@@ -15,11 +15,11 @@ WebApi = function (webview) {
   this.domReadyPromiseDeferred = new LoadingPromiseDeferred()
   this.domReadyPromiseDeferred.resolve()
 
-  this.deferredMap = new Map();
+  this.deferredMap = new Map()
 
   this.webview.addEventListener('dom-ready', () => {
     if (this.domReadyPromiseDeferred) {
-      this.domReadyPromiseDeferred.resolve();
+      this.domReadyPromiseDeferred.resolve()
     }
   });
 
@@ -32,7 +32,7 @@ WebApi = function (webview) {
       this.webview.loadURL(`${this.url}${this.loginUri}`)
     })
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.loadLoginURL = () => {
@@ -40,7 +40,7 @@ WebApi = function (webview) {
   }
 
   this.login = () => {
-    const deferred = new LoadingPromiseDeferred();
+    const deferred = new LoadingPromiseDeferred()
 
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
@@ -51,23 +51,23 @@ WebApi = function (webview) {
         .then(() => this.executeJavaScript(`document.getElementById("id_passlogin").click()`))
     })
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.executeJavaScript = (script) => {
-    let execResolve;
+    let execResolve
     const execPromise = new Promise((resolve, reject) => {
-      execResolve = resolve;
+      execResolve = resolve
     });
 
     this.webview.executeJavaScript(script, false, () => execResolve())
 
-    return execPromise;
+    return execPromise
   }
 
   this.isLogin = () => {
     if (this.getModule() !== 'top') {
-      return false;
+      return false
     }
     return true
   }
@@ -87,7 +87,7 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      this.executeJavaScript(`web_api_broker.arrive()`);
+      this.executeJavaScript(`web_api_broker.arrive()`)
 
     });
 
@@ -99,50 +99,56 @@ WebApi = function (webview) {
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      this.executeJavaScript(`web_api_broker.dismiss()`);
+      this.executeJavaScript(`web_api_broker.dismiss()`)
 
     });
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.getArriveTime = () => {
     const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getArriveTime('${deferred.id}')`);
+    this.executeJavaScript(`web_api_broker.getArriveTime('${deferred.id}')`)
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.getDismissTime = () => {
     const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getDismissTime('${deferred.id}')`);
+    this.executeJavaScript(`web_api_broker.getDismissTime('${deferred.id}')`)
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.getOwner = () => {
     const deferred = this.addDeferred()
 
-    this.executeJavaScript(`web_api_broker.getOwner('${deferred.id}')`);
+    this.executeJavaScript(`web_api_broker.getOwner('${deferred.id}')`)
 
-    return deferred.promise;
+    return deferred.promise
   }
 
   this.syncStore = () => {
     const auth = store.get('auth')
 
     if (!auth) {
-      return Promise.reject()
+      return Promise.reject({
+          redirect_to_login: true
+      })
     }
 
     if (!'employeeId' in auth || !'password' in auth) {
-      return Promise.reject()
+      return Promise.reject({
+          redirect_to_login: true
+      })
     }
 
     if (!auth.employeeId || !auth.password) {
-      return Promise.reject()
+      return Promise.reject({
+          redirect_to_login: true
+      })
     }
 
     this.login_id = auth.employeeId
@@ -150,10 +156,10 @@ WebApi = function (webview) {
   }
 
   function Deferred() {
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let id = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let id = ''
     for (let i = 0; i < 6; i++) {
-      id += possible.charAt(Math.floor(Math.random() * possible.length));
+      id += possible.charAt(Math.floor(Math.random() * possible.length))
     }
 
     this.promise = new Promise((resolve, reject) => {
@@ -179,15 +185,15 @@ WebApi = function (webview) {
 
     const deferred = this.deferredMap.get(id)
 
-    deferred.resolve(value);
+    deferred.resolve(value)
 
     this.deferredMap.delete(id)
   }
 
   function LoadingPromiseDeferred() {
     this.promise = new Promise((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
+      this.resolve = resolve
+      this.reject = reject
     });
   }
 }

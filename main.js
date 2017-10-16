@@ -77,7 +77,7 @@ app.on('window-all-closed', function () {
   if (appIcon) appIcon.destroy()
 })
 
-app.dock.hide();
+app.dock.hide()
 
 const showWebviewHandler = () => {
   const template = appIconTemplate[7];
@@ -112,12 +112,12 @@ app.on('ready', () => {
   appIcon = new Tray(__dirname + '/app/img/tray-icon-rakuten@2x.png');
   const contextMenu = Menu.buildFromTemplate(appIconTemplate);
 
-  appIcon.setToolTip('Rakuten Games');
+  appIcon.setToolTip('Rakuten Games')
   appIcon.setContextMenu(contextMenu)
 })
 
 ipcMain.on('main-getArriveTime', (ev, dt) => {
-  const template = appIconTemplate[2];
+  const template = appIconTemplate[2]
 
   if (dt) {
     template.label = `Arrive on ${dt}`
@@ -136,7 +136,7 @@ ipcMain.on('main-getArriveTime', (ev, dt) => {
 })
 
 ipcMain.on('main-getDismissTime', (ev, dt) => {
-  const template = appIconTemplate[3];
+  const template = appIconTemplate[3]
 
   if (dt) {
     template.label = `Dismiss on ${dt}`
@@ -155,7 +155,7 @@ ipcMain.on('main-getDismissTime', (ev, dt) => {
 })
 
 ipcMain.on('main-getOwner', (ev, owner) => {
-  const template = appIconTemplate[0];
+  const template = appIconTemplate[0]
   if (owner) {
     template.label = `${owner}`
   } else {

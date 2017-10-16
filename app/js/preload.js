@@ -7,17 +7,17 @@ function jqueryPromiseDeferred() {
   });
 }
 
-const jqueryDeferred = new jqueryPromiseDeferred();
+const jqueryDeferred = new jqueryPromiseDeferred()
 
 window.onload = () => {
-  const script = document.createElement("script");
-  script.src = "https://code.jquery.com/jquery-2.1.4.min.js";
+  const script = document.createElement("script")
+  script.src = "https://code.jquery.com/jquery-2.1.4.min.js"
   script.onload = script.onreadystatechange = () => {
     $(document).ready(() => {
       jqueryDeferred.resolve();
     });
   };
-  document.body.appendChild(script);
+  document.body.appendChild(script)
 };
 
 WebApiBroker = function () {
@@ -84,4 +84,4 @@ WebApiBroker = function () {
   }
 }
 
-web_api_broker = new WebApiBroker();
+web_api_broker = new WebApiBroker()

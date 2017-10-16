@@ -3,8 +3,9 @@ const ipcRenderer = require('electron').ipcRenderer
 const store = require('store')
 const moment = require('moment')
 const AsyncLock = require('async-lock')
-const notifier = require('node-notifier');
-require('./webapi')
+const notifier = require('node-notifier')
+const path = require('path')
+require('../webapi')
 
 const webview = document.querySelector('webview')
 const web_api = new WebApi(webview)
@@ -12,7 +13,7 @@ const web_api = new WebApi(webview)
 const lock = new AsyncLock()
 const LOCK_KEY = 'WEBVIEW_LOCK'
 
-const INFINITY_LOOP_TIMER = 600000
+const INFINITY_LOOP_TIMER = 60000
 const RESUME_DELAY_TIMER = 10000
 
 const loginHandler = (opt) => {
@@ -25,9 +26,10 @@ const loginHandler = (opt) => {
       .then(() => web_api.login())
       .then(() => {
         if (!web_api.isLogin()) {
-          ipcRenderer.send('main-showLogin')
-
-          return Promise.reject('Login failed\nPlease check the login data')
+          return Promise.reject({
+              message: 'Login failed\nPlease check the login data',
+              redirect_to_login: true
+          })
         }
       })
       .then(() => {
@@ -49,19 +51,26 @@ const loginHandler = (opt) => {
             new window.Notification(notification.title, notification)
           })
       })
-      .catch((msg) => {
+      .catch((err) => {
         done()
 
         if (opt &&'silent' in opt && opt.silent) {
           return
         }
 
-        if (msg) {
-          const notification = {
-            title: 'RGames',
-            body: msg
+        if (err) {
+
+          if ('message' in err && err.message) {
+              const notification = {
+                  title: 'RGames',
+                  body: err.message
+              }
+              new window.Notification(notification.title, notification)
           }
-          new window.Notification(notification.title, notification)
+
+          if ('redirect_to_login' in err && err.redirect_to_login) {
+              ipcRenderer.send('main-showLogin')
+          }
         }
       })
   })
@@ -111,65 +120,67 @@ const dismissHandler = () => {
 }
 
 const queryStateHandler = () => {
-  lock.acquire(LOCK_KEY, (done) => {
-    const today = moment();
 
-    const checkArriveStart = moment('07:00', "hh:mm")
-    const checkArriveEnd = moment('10:00', "hh:mm")
+  const today = moment();
 
-    if (today.isAfter(checkArriveStart) && today.isBefore(checkArriveEnd)) {
-      const arrive_time = store.get('arrive_time')
+  const checkArriveStart = moment('07:00', "hh:mm")
+  const checkArriveEnd = moment('10:00', "hh:mm")
 
-      if (!arrive_time) {
-        const nc = new notifier.NotificationCenter()
-        const trueAnswer = 'Let\' GO'
+  if (today.isAfter(checkArriveStart) && today.isBefore(checkArriveEnd)) {
+    const arrive_time = store.get('arrive_time')
 
-        nc.notify({
-            title: 'Forget to check in?',
-            message: 'Do you want to check in?',
-            closeLabel: 'No',
-            actions: trueAnswer
-          }, function (err, response, metadata) {
-            if (err) throw err;
+    if (!arrive_time) {
+      const nc = new notifier.NotificationCenter()
+      const trueAnswer = 'Let\' GO'
 
-            if (metadata.activationValue !== trueAnswer) {
-              return
-            }
+      nc.notify({
+          title: 'Forget to check in?',
+          message: 'Do you want to check in?',
+          closeLabel: 'No',
+          actions: trueAnswer,
+          timeout: 5,
+        }, function (err, response, metadata) {
+          if (err) throw err;
 
-            arriveHandler()
+          if (metadata.activationValue !== trueAnswer) {
+            return
           }
-        )
-      }
+
+          arriveHandler()
+        }
+      )
     }
+  }
 
-    const checkDismissStart = moment('17:35', "hh:mm")
-    const checkDismissEnd = moment('20:00', "hh:mm")
+  const checkDismissStart = moment('17:31', "hh:mm")
+  const checkDismissEnd = moment('20:00', "hh:mm")
 
-    if (today.isAfter(checkDismissStart) && today.isBefore(checkDismissEnd)) {
-      const arrive_time = store.get('dismiss_time')
+  if (today.isAfter(checkDismissStart) && today.isBefore(checkDismissEnd)) {
+    const arrive_time = store.get('dismiss_time')
 
-      if (!arrive_time) {
-        const nc = new notifier.NotificationCenter()
-        const trueAnswer = 'Let\' GO'
+    if (!arrive_time) {
+      const nc = new notifier.NotificationCenter()
+      const trueAnswer = 'Let\' GO'
 
-        nc.notify({
-            title: 'Forget to check out?',
-            message: 'Do you want to check out?',
-            closeLabel: 'No',
-            actions: trueAnswer
-          }, function (err, response, metadata) {
-            if (err) throw err
+      nc.notify({
+          title: 'Forget to check out?',
+          message: 'Do you want to check out?',
+          closeLabel: 'No',
+          actions: trueAnswer,
+          timeout: 5,
+        }, function (err, response, metadata) {
+          if (err) throw err
 
-            if (metadata.activationValue !== trueAnswer) {
-              return
-            }
-
-            dismissHandler()
+          if (metadata.activationValue !== trueAnswer) {
+            return
           }
-        )
-      }
+
+          dismissHandler()
+        }
+      )
     }
-  })
+  }
+
 }
 
 const infinityLoopHandler = () => {
@@ -237,7 +248,7 @@ ipcRenderer.on(`webview-resume`, (event) => {
 
     infinityLoopTimer = setInterval(() => {
       infinityLoopHandler()
-    }, INFINITY_LOOP_TIMER);
+    }, INFINITY_LOOP_TIMER)
 
   })
 
