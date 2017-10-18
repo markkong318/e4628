@@ -5,6 +5,7 @@ const moment = require('moment')
 const AsyncLock = require('async-lock')
 const notifier = require('node-notifier')
 const path = require('path')
+const logger = require('../debug').logger
 require('../webapi')
 
 const webview = document.querySelector('webview')
@@ -19,6 +20,8 @@ const RESUME_DELAY_TIMER = 10000
 const loginHandler = (opt) => {
 
   lock.acquire(LOCK_KEY, (done) => {
+    logger.info(`Start the login handler`)
+
     store.set('last_login', moment().format('YYYY-MM-DD'))
 
     web_api.loadLoginURL()
@@ -79,6 +82,8 @@ const loginHandler = (opt) => {
 
 const arriveHandler = () => {
   lock.acquire(LOCK_KEY, (done) => {
+    logger.info(`Start the arrive handler`)
+
     web_api.loadLoginURL()
       .then(() => web_api.login())
       .then(() => web_api.arrive())
@@ -100,6 +105,8 @@ const arriveHandler = () => {
 
 const dismissHandler = () => {
   lock.acquire(LOCK_KEY, (done) => {
+    logger.info(`Start the dismiss handler`)
+
     web_api.loadLoginURL()
       .then(() => web_api.login())
       .then(() => web_api.dismiss())
@@ -120,6 +127,9 @@ const dismissHandler = () => {
 }
 
 const queryStateHandler = () => {
+  logger.info(`Start the query handler`)
+  logger.info(`Arrive time: ${store.get('arrive_time')}`)
+  logger.info(`Dismiss time: ${store.get('dismiss_time')}`)
 
   const today = moment();
 
@@ -184,8 +194,11 @@ const queryStateHandler = () => {
 }
 
 const infinityLoopHandler = () => {
+  logger.info(`Start the infinity loop handler`)
+  logger.info(`last login is: ${store.get('last_login')}`)
+
   if (store.get('last_login') !== moment().format('YYYY-MM-DD')) {
-    loginHandler()
+    loginHandler({silent: true})
   }
   queryStateHandler()
 }
@@ -196,7 +209,7 @@ let infinityLoopTimer = setInterval(() => {
 
 const initialDomReadyHandler = () => {
   webview.removeEventListener('dom-ready', initialDomReadyHandler)
-
+  webview.openDevTools()
   loginHandler();
 }
 
@@ -234,15 +247,14 @@ ipcRenderer.on(`webview-saveAuth`, (event) => {
 })
 
 ipcRenderer.on(`webview-resume`, (event) => {
+  logger.info(`Resume`)
 
   const promise = new Promise((resolve, reject) => {
     setTimeout(() => resolve(), RESUME_DELAY_TIMER)
   })
 
   promise.then(() => {
-    loginHandler({silent: true})
-  }).then(() => {
-    queryStateHandler()
+    infinityLoopHandler()
 
     clearInterval(infinityLoopTimer)
 

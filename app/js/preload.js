@@ -1,4 +1,5 @@
-const ipcRenderer = require('electron').ipcRenderer;
+const ipcRenderer = require('electron').ipcRenderer
+const logger = require('./debug').logger
 
 function jqueryPromiseDeferred() {
   this.promise = new Promise((resolve, reject) => {
@@ -41,7 +42,6 @@ WebApiBroker = function () {
   }
 
   this.getArriveTime = (deferred_id) => {
-
     jqueryDeferred.promise.then(() => {
       let time = ''
 
@@ -49,16 +49,17 @@ WebApiBroker = function () {
         $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(2) > #timerecorder_txt').text()
       const match = time_txt.match(/\d+:\d+/);
 
-      if (match && match.length == 1) {
+      if (match && match.length === 1) {
         time = match[0];
       }
+
+      logger.info(`Get arrive time from webview: ${time}`)
 
       ipcRenderer.send(`webview-getArriveTime`, time, deferred_id)
     })
   }
 
   this.getDismissTime = (deferred_id) => {
-
     jqueryDeferred.promise.then(() => {
       let time = ''
 
@@ -66,18 +67,21 @@ WebApiBroker = function () {
         $('#sub_header_border_top > form > table > tbody > tr > td:nth-child(4) > #timerecorder_txt').text()
       const match = time_txt.match(/\d+:\d+/);
 
-      if (match && match.length == 1) {
+      if (match && match.length === 1) {
         time = match[0]
       }
+
+      logger.info(`Get dismiss time from webview: ${time}`)
 
       ipcRenderer.send(`webview-getDismissTime`, time, deferred_id)
     })
   }
 
   this.getOwner = (deferred_id) => {
-
     jqueryDeferred.promise.then(() => {
       const user_name = $('.user_name').text()
+
+      logger.info(`Get user name from webview: ${user_name}`)
 
       ipcRenderer.send(`webview-getOwner`, user_name, deferred_id)
     })

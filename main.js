@@ -11,6 +11,14 @@ const url = require('url')
 
 const ipcMain = require('electron').ipcMain;
 
+const log4js = require('log4js');
+
+log4js.configure({
+  appenders: { main: { type: 'file', filename: 'debug.log' } },
+  categories: { default: { appenders: ['main'], level: 'trace' } }
+});
+
+
 let mainWindow
 let loginWindow
 
@@ -170,6 +178,3 @@ ipcMain.on('main-showLogin', (ev) => {
   loginWindow.show()
 })
 
-ipcMain.on('main-debug', (msg) => {
-  console.log(msg)
-})
