@@ -193,11 +193,41 @@ const queryStateHandler = () => {
 
 }
 
+const getToday = () => {
+  const now = moment()
+  const today = moment().format('YYYY-MM-DD 05:00:00')
+  const yesterday = moment().add(-1,'days').format('YYYY-MM-DD 05:00:00')
+  logger.info(`today: ${today}`)
+  logger.info(`yesterday: ${yesterday}`)
+
+  if (now >= moment(today)) {
+    return today
+  }
+
+  return yesterday
+}
+
+const setLastLogin = (today) => {
+  store.set('last_login', today)
+}
+
+const isNewDay = () => {
+  const today = getToday()
+
+  setLastLogin(today)
+
+  if (store.get('last_login') === today) {
+    return false
+  }
+  
+  return true
+}
+
 const infinityLoopHandler = () => {
   logger.info(`Start the infinity loop handler`)
   logger.info(`last login is: ${store.get('last_login')}`)
 
-  if (store.get('last_login') !== moment().format('YYYY-MM-DD')) {
+  if (isNewDay()) {
     loginHandler({silent: true})
   }
   queryStateHandler()
