@@ -213,13 +213,14 @@ const setLastLogin = (today) => {
 
 const isNewDay = () => {
   const today = getToday()
+  const last_login = store.get('last_login')
 
   setLastLogin(today)
 
-  if (store.get('last_login') === today) {
+  if (last_login === today) {
     return false
   }
-  
+
   return true
 }
 
