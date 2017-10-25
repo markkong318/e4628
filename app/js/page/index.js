@@ -22,7 +22,7 @@ const loginHandler = (opt) => {
   lock.acquire(LOCK_KEY, (done) => {
     logger.info(`Start the login handler`)
 
-    store.set('last_login', moment().format('YYYY-MM-DD'))
+    store.set('last_login', getToday())
 
     web_api.loadLoginURL()
       .then(() => web_api.syncStore())
@@ -130,6 +130,11 @@ const queryStateHandler = () => {
   logger.info(`Start the query handler`)
   logger.info(`Arrive time: ${store.get('arrive_time')}`)
   logger.info(`Dismiss time: ${store.get('dismiss_time')}`)
+
+  const owner = store.get('owner')
+  if (!owner) {
+    return
+  }
 
   const today = moment();
 
@@ -263,6 +268,8 @@ ipcMain.on(`webview-getDismissTime`, (event, value, deferred_id) => {
 ipcMain.on(`webview-getOwner`, (event, value, deferred_id) => {
   ipcRenderer.send('main-getOwner', value)
   web_api.resolveDeferred(deferred_id, value)
+
+  store.set('owner', value)
 })
 
 ipcRenderer.on(`webview-clickDismiss`, (event, value) => {
