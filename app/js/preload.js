@@ -86,6 +86,31 @@ WebApiBroker = function () {
       ipcRenderer.send(`webview-getOwner`, user_name, deferred_id)
     })
   }
+
+  this.getHtmlBody = (deferred_id) => {
+    jqueryDeferred.promise.then(() => {
+      const html = $('body').text()
+
+      logger.info(`Get html body from webview: ${html}`)
+
+      ipcRenderer.send(`webview-getHtmlBody`, html, deferred_id)
+    })
+  }
+  
+  this.isValidPage = (deferred_id) => {
+    jqueryDeferred.promise.then(() => {
+      const title = $('head > title').text()
+
+      logger.info(`Get page title from webview: ${title}`)
+
+      let isValid = false
+      if (title.indexOf('万屋一家') !== -1 || title.indexOf('Yorozuya Ikka Series') !== -1) {
+        isValid = true
+      }
+
+      ipcRenderer.send(`webview-isValidPage`, isValid, deferred_id)
+    })
+  }
 }
 
 web_api_broker = new WebApiBroker()

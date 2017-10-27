@@ -1,7 +1,7 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "name": "e4628",
+  "version": "1.1.0",
+  "description": "e4628 login tool",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

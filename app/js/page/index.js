@@ -11,11 +11,54 @@ require('../webapi')
 const webview = document.querySelector('webview')
 const web_api = new WebApi(webview)
 
+window.webview = webview
+window.web_api = web_api
+
 const lock = new AsyncLock()
 const LOCK_KEY = 'WEBVIEW_LOCK'
 
 const INFINITY_LOOP_TIMER = 60000
 const RESUME_DELAY_TIMER = 10000
+
+const errorHandler = (err) => {
+  const defult = {
+    action: '',
+    silent: false,
+    message: '',
+    redirect_to_login: false,
+    retry: 5000,
+    src_handler: () => {}
+  }
+
+  err = Object.assign({}, defult, err)
+
+  logger.error(`call error handler with action ${err.action}`)
+
+  if (err.silent) {
+    return
+  }
+
+  if (err) {
+
+    if (err.message) {
+      const notification = {
+        title: 'RGames',
+        body: err.message
+      }
+      new window.Notification(notification.title, notification)
+    }
+
+    if (err.redirect_to_login) {
+      ipcRenderer.send('main-showLogin')
+    }
+
+    if (err.retry) {
+      logger.info(`retry in ${err.retry}ms`)
+
+      setTimeout(err.src_handler, err.retry)
+    }
+  }
+}
 
 const loginHandler = (opt) => {
 
@@ -27,6 +70,17 @@ const loginHandler = (opt) => {
     web_api.loadLoginURL()
       .then(() => web_api.syncStore())
       .then(() => web_api.login())
+      .then(() => {
+        return web_api.isValidPage()
+          .then((value) => {
+            if (!value) {
+              return Promise.reject({
+                retry: 5000,
+                action: 'check page valid'
+              })
+            }
+          })
+      })
       .then(() => {
         if (!web_api.isLogin()) {
           return Promise.reject({
@@ -57,24 +111,12 @@ const loginHandler = (opt) => {
       .catch((err) => {
         done()
 
-        if (opt &&'silent' in opt && opt.silent) {
-          return
-        }
+        err = Object.assign({}, err, {
+          src_handler: loginHandler,
+          silent: opt && opt.silent ? opt.silent : null
+        })
 
-        if (err) {
-
-          if ('message' in err && err.message) {
-              const notification = {
-                  title: 'RGames',
-                  body: err.message
-              }
-              new window.Notification(notification.title, notification)
-          }
-
-          if ('redirect_to_login' in err && err.redirect_to_login) {
-              ipcRenderer.send('main-showLogin')
-          }
-        }
+        errorHandler(err)
       })
   })
 
@@ -87,7 +129,7 @@ const arriveHandler = () => {
     web_api.loadLoginURL()
       .then(() => web_api.login())
       .then(() => web_api.arrive())
-      .then(() => {
+      .then(() => (
         web_api.getArriveTime()
           .then((time) => {
             done()
@@ -99,6 +141,15 @@ const arriveHandler = () => {
 
             new window.Notification(notification.title, notification)
           })
+      ))
+      .catch((err) => {
+        done()
+
+        err = Object.assign({}, err, {
+          src_handler: arriveHandler
+        })
+
+        errorHandler(err)
       })
   })
 }
@@ -110,7 +161,7 @@ const dismissHandler = () => {
     web_api.loadLoginURL()
       .then(() => web_api.login())
       .then(() => web_api.dismiss())
-      .then(() => {
+      .then(() => (
         web_api.getDismissTime()
           .then((time) => {
             done()
@@ -122,6 +173,15 @@ const dismissHandler = () => {
 
             new window.Notification(notification.title, notification)
           })
+      ))
+      .catch((err) => {
+        done()
+
+        err = Object.assign({}, err, {
+          src_handler: dismissHandler
+        })
+
+        errorHandler(err)
       })
   })
 }
@@ -270,6 +330,14 @@ ipcMain.on(`webview-getOwner`, (event, value, deferred_id) => {
   web_api.resolveDeferred(deferred_id, value)
 
   store.set('owner', value)
+})
+
+ipcMain.on(`webview-getHtmlBody`, (event, value, deferred_id) => {
+  web_api.resolveDeferred(deferred_id, value)
+})
+
+ipcMain.on(`webview-isValidPage`, (event, value, deferred_id) => {
+  web_api.resolveDeferred(deferred_id, value)
 })
 
 ipcRenderer.on(`webview-clickDismiss`, (event, value) => {

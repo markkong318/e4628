@@ -12,7 +12,9 @@ WebApi = function (webview) {
 
   this.webview = webview
 
-  this.domReadyPromiseDeferred = new LoadingPromiseDeferred()
+  this.domReadyPromiseDeferred = new LoadingPromiseDeferred({
+    action: 'bootstrap'
+  })
   this.domReadyPromiseDeferred.resolve()
 
   this.deferredMap = new Map()
@@ -24,7 +26,9 @@ WebApi = function (webview) {
   });
 
   this.loadURL = (url) => {
-    const deferred = new LoadingPromiseDeferred();
+    const deferred = new LoadingPromiseDeferred({
+      action: `load ${this.url}${this.loginUri}`
+    });
 
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
@@ -36,19 +40,21 @@ WebApi = function (webview) {
   }
 
   this.loadLoginURL = () => {
-    return this.loadURL(`${this.loginUri}${this.topUri}`)
+    return this.loadURL(`${this.url}${this.topUri}`)
   }
 
   this.login = () => {
-    const deferred = new LoadingPromiseDeferred()
+    const deferred = new LoadingPromiseDeferred({
+      action: 'execute login script'
+    })
 
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      this.executeJavaScript(`document.getElementById("y_companycd").value = "${this.company_id}"`)
-        .then(() => this.executeJavaScript(`document.getElementById("y_logincd").value = "${this.login_id}"`))
-        .then(() => this.executeJavaScript(`document.getElementById("password").value = "${this.password}"`))
-        .then(() => this.executeJavaScript(`document.getElementById("id_passlogin").click()`))
+      this.executeJavaScript(`document.getElementById("y_companycd") ? document.getElementById("y_companycd").value = "${this.company_id}" : null`)
+        .then(() => this.executeJavaScript(`document.getElementById("y_logincd") ? document.getElementById("y_logincd").value = "${this.login_id}" : null`))
+        .then(() => this.executeJavaScript(`document.getElementById("password") ? document.getElementById("password").value = "${this.password}" : null`))
+        .then(() => this.executeJavaScript(`document.getElementById("id_passlogin") ? document.getElementById("id_passlogin").click() : null`))
     })
 
     return deferred.promise
@@ -130,6 +136,14 @@ WebApi = function (webview) {
     return deferred.promise
   }
 
+  this.isValidPage = () => {
+    const deferred = this.addDeferred()
+
+    this.executeJavaScript(`web_api_broker.isValidPage('${deferred.id}')`)
+
+    return deferred.promise
+  }
+
   this.syncStore = () => {
     const auth = store.get('auth')
 
@@ -190,11 +204,31 @@ WebApi = function (webview) {
     this.deferredMap.delete(id)
   }
 
-  function LoadingPromiseDeferred() {
+  function LoadingPromiseDeferred(opt) {
+    this.opt = opt
+
+    this.isResolved = false
+    this.isRejected = false
+
     this.promise = new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
-    });
+    }).then(() => {
+      this.isResolved = true
+
+      clearTimeout(this.timer)
+    }).catch(() => {
+      this.isRejected = true
+    })
+
+    this.timer = setTimeout(() => {
+      if (!this.isResolved && !this.isRejected) {
+        this.reject({
+          retry: 5000,
+          action: this.opt.action
+        })
+      }
+    }, 15000)
   }
 }
 
