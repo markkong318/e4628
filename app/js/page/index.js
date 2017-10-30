@@ -18,7 +18,7 @@ const lock = new AsyncLock()
 const LOCK_KEY = 'WEBVIEW_LOCK'
 
 const INFINITY_LOOP_TIMER = 60000
-const RESUME_DELAY_TIMER = 10000
+const RESUME_DELAY_TIMER = 5000
 
 const errorHandler = (err) => {
   const defult = {

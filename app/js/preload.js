@@ -96,7 +96,7 @@ WebApiBroker = function () {
       ipcRenderer.send(`webview-getHtmlBody`, html, deferred_id)
     })
   }
-  
+
   this.isValidPage = (deferred_id) => {
     jqueryDeferred.promise.then(() => {
       const title = $('head > title').text()

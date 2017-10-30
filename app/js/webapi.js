@@ -27,20 +27,20 @@ WebApi = function (webview) {
 
   this.loadURL = (url) => {
     const deferred = new LoadingPromiseDeferred({
-      action: `load ${this.url}${this.loginUri}`
+      action: `load ${url}`
     });
 
     this.domReadyPromiseDeferred.promise.then(() => {
       this.domReadyPromiseDeferred = deferred
 
-      this.webview.loadURL(`${this.url}${this.loginUri}`)
+      this.webview.loadURL(`${url}`)
     })
 
     return deferred.promise
   }
 
   this.loadLoginURL = () => {
-    return this.loadURL(`${this.url}${this.topUri}`)
+    return this.loadURL(`${this.url}${this.loginUri}`)
   }
 
   this.login = () => {
