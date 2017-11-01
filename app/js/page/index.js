@@ -34,18 +34,16 @@ const errorHandler = (err) => {
 
   logger.error(`call error handler with action ${err.action}`)
 
-  if (err.silent) {
-    return
-  }
-
   if (err) {
 
     if (err.message) {
-      const notification = {
-        title: 'RGames',
-        body: err.message
+      if (!err.silent) {
+        const notification = {
+          title: 'RGames',
+          body: err.message
+        }
+        new window.Notification(notification.title, notification)
       }
-      new window.Notification(notification.title, notification)
     }
 
     if (err.redirect_to_login) {
@@ -97,15 +95,15 @@ const loginHandler = (opt) => {
             done()
 
             if (opt &&'silent' in opt && opt.silent) {
-              return
-            }
+              // do nothing
+            } else {
+              const notification = {
+                title: 'RGames',
+                body: `Hi! Welcome back \n${name}`
+              }
 
-            const notification = {
-              title: 'RGames',
-              body: `Hi! Welcome back \n${name}`
+              new window.Notification(notification.title, notification)
             }
-
-            new window.Notification(notification.title, notification)
           })
       })
       .catch((err) => {
