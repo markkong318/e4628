@@ -27,7 +27,8 @@ const errorHandler = (err) => {
     message: '',
     redirect_to_login: false,
     retry: 5000,
-    src_handler: () => {}
+    src_handler: () => {},
+    scr_args: {}
   }
 
   err = Object.assign({}, defult, err)
@@ -53,7 +54,7 @@ const errorHandler = (err) => {
     if (err.retry) {
       logger.info(`retry in ${err.retry}ms`)
 
-      setTimeout(err.src_handler, err.retry)
+      setTimeout(() => err.src_handler(err.args), err.retry)
     }
   }
 }
@@ -111,6 +112,7 @@ const loginHandler = (opt) => {
 
         err = Object.assign({}, err, {
           src_handler: loginHandler,
+          src_args: opt,
           silent: opt && opt.silent ? opt.silent : null
         })
 
@@ -291,10 +293,13 @@ const infinityLoopHandler = () => {
   logger.info(`Start the infinity loop handler`)
   logger.info(`last login is: ${store.get('last_login')}`)
 
+  const promise = Promise.resolve()
+
   if (isNewDay()) {
-    loginHandler({silent: true})
+    promise.then(() => loginHandler({silent: true}))
   }
-  queryStateHandler()
+
+  promise.then(() => queryStateHandler())
 }
 
 let infinityLoopTimer = setInterval(() => {

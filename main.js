@@ -1,23 +1,13 @@
 const electron = require('electron')
-// Module to control application life.
 const app = electron.app
 const Menu = electron.Menu
 const Tray = electron.Tray
-// Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
 
 const ipcMain = require('electron').ipcMain;
-
-const log4js = require('log4js');
-
-log4js.configure({
-  appenders: { main: { type: 'file', filename: 'debug.log' } },
-  categories: { default: { appenders: ['main'], level: 'trace' } }
-});
-
 
 let mainWindow
 let loginWindow
@@ -102,6 +92,12 @@ const showWebviewHandler = () => {
   appIcon.setContextMenu(contextMenu)
 }
 
+const appIconIndex = {
+  OWNER:        0,
+  ARRIVE_TIME:  2,
+  DISMISS_TIME: 3,
+}
+
 const appIconTemplate = [
   {label: 'Initialize user name...', enabled: false},
   {type: 'separator'},
@@ -125,18 +121,21 @@ app.on('ready', () => {
 })
 
 ipcMain.on('main-getArriveTime', (ev, dt) => {
-  const template = appIconTemplate[2]
+  const arriveTemplate = appIconTemplate[appIconIndex.ARRIVE_TIME]
+  const dismissTemplate = appIconTemplate[appIconIndex.DISMISS_TIME]
 
   if (dt) {
-    template.label = `Arrive on ${dt}`
-    template.enabled = false
-    template.click = null
+    arriveTemplate.label = `Arrive on ${dt}`
+    arriveTemplate.enabled = false
+    arriveTemplate.click = null
   } else {
-    template.label = `Click to Arrive`
-    template.enabled = true
-    template.click = () => {
+    arriveTemplate.label = `Click to Arrive`
+    arriveTemplate.enabled = true
+    arriveTemplate.click = () => {
       mainWindow.webContents.send('webview-clickArrive')
     }
+
+    dismissTemplate.enabled = false
   }
 
   const contextMenu = Menu.buildFromTemplate(appIconTemplate);
@@ -144,16 +143,16 @@ ipcMain.on('main-getArriveTime', (ev, dt) => {
 })
 
 ipcMain.on('main-getDismissTime', (ev, dt) => {
-  const template = appIconTemplate[3]
+  const dismissTemplate = appIconTemplate[appIconIndex.DISMISS_TIME]
 
   if (dt) {
-    template.label = `Dismiss on ${dt}`
-    template.enabled = false
-    template.click = null
+    dismissTemplate.label = `Dismiss on ${dt}`
+    dismissTemplate.enabled = false
+    dismissTemplate.click = null
   } else {
-    template.label = `Click to Dismiss`
-    template.enabled = true
-    template.click = () => {
+    dismissTemplate.label = `Click to Dismiss`
+    dismissTemplate.enabled = true
+    dismissTemplate.click = () => {
       mainWindow.webContents.send('webview-clickDismiss')
     }
   }
@@ -163,7 +162,7 @@ ipcMain.on('main-getDismissTime', (ev, dt) => {
 })
 
 ipcMain.on('main-getOwner', (ev, owner) => {
-  const template = appIconTemplate[0]
+  const template = appIconTemplate[appIconIndex.OWNER]
   if (owner) {
     template.label = `${owner}`
   } else {
