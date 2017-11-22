@@ -2,6 +2,7 @@ const ipcRenderer = require('electron').ipcRenderer;
 const store = require('store');
 
 const signInBtn = document.querySelector('#sign_in_btn')
+const exitBtn = document.querySelector('#exit_btn')
 const employeeIdField = document.querySelector('#employee_id')
 const passwordField = document.querySelector('#password')
 
@@ -17,7 +18,12 @@ const clickSignInHandler = () => {
   ipcRenderer.send('main-saveAuth')
 }
 
+const clickExitHandler = () => {
+  ipcRenderer.send('main-exitAuth')
+}
+
 signInBtn.addEventListener('click', clickSignInHandler)
+exitBtn.addEventListener('click', clickExitHandler)
 
 const auth = store.get('auth')
 

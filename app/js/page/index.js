@@ -261,7 +261,7 @@ const queryStateHandler = () => {
 const getToday = () => {
   const now = moment()
   const today = moment().format('YYYY-MM-DD 05:00:00')
-  const yesterday = moment().add(-1,'days').format('YYYY-MM-DD 05:00:00')
+  const yesterday = moment().add(-1, 'days').format('YYYY-MM-DD 05:00:00')
   logger.info(`today: ${today}`)
   logger.info(`yesterday: ${yesterday}`)
 

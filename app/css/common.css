@@ -189,6 +189,7 @@ form {
 .button-panel {
 	margin: 2em 0 0;
 	width: 100%;
+	text-align: left;
 }
 
 .button-panel .button {
@@ -197,6 +198,7 @@ form {
 	color: #fff;
 	cursor: pointer;
 	height: 50px;
+	margin: 1px 0 1px 0;
 	font-family: 'Open Sans', sans-serif;
 	font-size: 1.2em;
 	letter-spacing: 0.05em;
@@ -204,6 +206,10 @@ form {
 	text-transform: uppercase;
 	transition: background 0.3s ease-in-out;
 	width: 100%;
+}
+
+.button-panel .button.exit {
+	width: 50px;
 }
 
 .button:hover {

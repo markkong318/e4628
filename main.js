@@ -48,6 +48,10 @@ ipcMain.on('main-saveAuth', (ev) => {
   mainWindow.webContents.send('webview-saveAuth')
 })
 
+ipcMain.on('main-exitAuth', () => {
+  loginWindow.hide()
+})
+
 app.on('ready', () => {
   createWindow()
   createLoginWindow()
