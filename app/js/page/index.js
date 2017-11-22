@@ -54,7 +54,7 @@ const errorHandler = (err) => {
     if (err.retry) {
       logger.info(`retry in ${err.retry}ms`)
 
-      setTimeout(() => err.src_handler(err.args), err.retry)
+      setTimeout(() => err.src_handler(err.scr_args), err.retry)
     }
   }
 }
@@ -95,7 +95,7 @@ const loginHandler = (opt) => {
           .then((name) => {
             done()
 
-            if (opt &&'silent' in opt && opt.silent) {
+            if (opt && 'silent' in opt && opt.silent) {
               // do nothing
             } else {
               const notification = {
@@ -293,10 +293,10 @@ const infinityLoopHandler = () => {
   logger.info(`Start the infinity loop handler`)
   logger.info(`last login is: ${store.get('last_login')}`)
 
-  const promise = Promise.resolve()
+  let promise = Promise.resolve()
 
   if (isNewDay()) {
-    promise.then(() => loginHandler({silent: true}))
+      promise = promise.then(() => loginHandler({silent: true}))
   }
 
   promise.then(() => queryStateHandler())
@@ -353,6 +353,12 @@ ipcRenderer.on(`webview-clickArrive`, (event, value) => {
 
 ipcRenderer.on(`webview-saveAuth`, (event) => {
   loginHandler()
+})
+
+ipcRenderer.on(`webview-clickSyncState`, (event, value) => {
+  Promise.resolve()
+    .then(() => loginHandler({silent: true}))
+    .then(() => queryStateHandler())
 })
 
 ipcRenderer.on(`webview-resume`, (event) => {

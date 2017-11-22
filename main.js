@@ -77,8 +77,16 @@ app.on('window-all-closed', function () {
 
 app.dock.hide()
 
+
+const appIconIndex = {
+    OWNER:            0,
+    ARRIVE_TIME:      2,
+    DISMISS_TIME:     3,
+    WEBVEIW_HANDLER:  8,
+}
+
 const showWebviewHandler = () => {
-  const template = appIconTemplate[7];
+  const template = appIconTemplate[appIconIndex.WEBVEIW_HANDLER];
 
   if (mainWindow.isVisible()) {
     mainWindow.hide()
@@ -92,10 +100,8 @@ const showWebviewHandler = () => {
   appIcon.setContextMenu(contextMenu)
 }
 
-const appIconIndex = {
-  OWNER:        0,
-  ARRIVE_TIME:  2,
-  DISMISS_TIME: 3,
+const syncStateHandler = () => {
+  mainWindow.webContents.send('webview-clickSyncState')
 }
 
 const appIconTemplate = [
@@ -106,6 +112,7 @@ const appIconTemplate = [
   {type: 'separator'},
   {label: 'Login', click: () => { loginWindow.show() }},
   {type: 'separator'},
+  {label: 'Sync State', click: syncStateHandler},
   {label: 'Show Debug Webview', click: showWebviewHandler},
   {type: 'separator'},
   {label: 'Exit', accelerator: 'Command+Q', click: () => { app.quit() }}
