@@ -54,7 +54,7 @@ const errorHandler = (err) => {
     if (err.retry) {
       logger.info(`retry in ${err.retry}ms`)
 
-      setTimeout(() => err.src_handler(err.scr_args), err.retry)
+      setTimeout(() => err.src_handler(err), err.retry)
     }
   }
 }
@@ -186,7 +186,7 @@ const dismissHandler = () => {
   })
 }
 
-const queryStateHandler = () => {
+const queryStateHandler = (opt) => {
   logger.info(`Start the query handler`)
   logger.info(`Arrive time: ${store.get('arrive_time')}`)
   logger.info(`Dismiss time: ${store.get('dismiss_time')}`)
@@ -205,25 +205,29 @@ const queryStateHandler = () => {
     const arrive_time = store.get('arrive_time')
 
     if (!arrive_time) {
-      const nc = new notifier.NotificationCenter()
-      const trueAnswer = 'Let\' GO'
+      if (opt && 'silent' in opt && opt.silent) {
+        // do nothing
+      } else {
+        const nc = new notifier.NotificationCenter()
+        const trueAnswer = 'Let\' GO'
 
-      nc.notify({
-          title: 'Forget to check in?',
-          message: 'Do you want to check in?',
-          closeLabel: 'No',
-          actions: trueAnswer,
-          timeout: 5,
-        }, function (err, response, metadata) {
-          if (err) throw err;
+        nc.notify({
+            title: 'Forget to check in?',
+            message: 'Do you want to check in?',
+            closeLabel: 'No',
+            actions: trueAnswer,
+            timeout: 5,
+          }, function (err, response, metadata) {
+            if (err) throw err;
 
-          if (metadata.activationValue !== trueAnswer) {
-            return
+            if (metadata.activationValue !== trueAnswer) {
+              return
+            }
+
+            arriveHandler()
           }
-
-          arriveHandler()
-        }
-      )
+        )
+      }
     }
   }
 
@@ -234,25 +238,29 @@ const queryStateHandler = () => {
     const arrive_time = store.get('dismiss_time')
 
     if (!arrive_time) {
-      const nc = new notifier.NotificationCenter()
-      const trueAnswer = 'Let\' GO'
+      if (opt && 'silent' in opt && opt.silent) {
+        // do nothing
+      } else {
+        const nc = new notifier.NotificationCenter()
+        const trueAnswer = 'Let\' GO'
 
-      nc.notify({
-          title: 'Forget to check out?',
-          message: 'Do you want to check out?',
-          closeLabel: 'No',
-          actions: trueAnswer,
-          timeout: 5,
-        }, function (err, response, metadata) {
-          if (err) throw err
+        nc.notify({
+            title: 'Forget to check out?',
+            message: 'Do you want to check out?',
+            closeLabel: 'No',
+            actions: trueAnswer,
+            timeout: 5,
+          }, function (err, response, metadata) {
+            if (err) throw err
 
-          if (metadata.activationValue !== trueAnswer) {
-            return
+            if (metadata.activationValue !== trueAnswer) {
+              return
+            }
+
+            dismissHandler()
           }
-
-          dismissHandler()
-        }
-      )
+        )
+      }
     }
   }
 
@@ -358,7 +366,7 @@ ipcRenderer.on(`webview-saveAuth`, (event) => {
 ipcRenderer.on(`webview-clickSyncState`, (event, value) => {
   Promise.resolve()
     .then(() => loginHandler({silent: true}))
-    .then(() => queryStateHandler())
+    .then(() => queryStateHandler({silent: true}))
 })
 
 ipcRenderer.on(`webview-resume`, (event) => {
